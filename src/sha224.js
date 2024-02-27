@@ -1,5 +1,5 @@
-import { K, byteToHex } from "./constants.js";
-import { uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE, Σ0, Σ1, σ0, σ1, Ch, Maj} from "./utils.js"
+import { byteToHex } from "./constants.js";
+import { hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./utils.js";
 
 const uint64buffer = new ArrayBuffer(8);
 const uint64view = new DataView(uint64buffer);
@@ -9,30 +9,14 @@ const uint64view = new DataView(uint64buffer);
  */
 export function sha224(source) {
     const msgLength = source.byteLength;
+    const payloadLength = msgLength + 1;
+    const payloadBlocks = Math.ceil(payloadLength / 64);
 
-    const payload = msgLength + 9;// 1 + 8
-    const blocksLength = Math.ceil(payload / 64);
-    const totalLength = blocksLength * 16;
-    
-    const buffer = new Array(totalLength);
-
-    const full = Math.trunc(msgLength / 4);
-    const remaining = msgLength % 4;
-
-    for (let i = 0; i < full; i++) {
-        buffer[i] = uint8ArrayToUint32BE(source, i * 4);
-    }
-    buffer[full] = uint8TailToUint32BE(source, full * 4, remaining, 0x80);
-
-    uint64view.setBigUint64(0, BigInt(msgLength) * 8n, false);
-    const lenHigh = uint64view.getUint32(0, false);
-    const lenLow = uint64view.getUint32(4, false);
-
-    buffer[totalLength - 2] = lenHigh;
-    buffer[totalLength - 1] = lenLow;
-
-    buffer.fill(0, full + 1, -2);
-
+    /**@type { number[] } */
+    const block = new Array(16);
+    /**@type { number[] } */
+    const W = new Array(64);
+    /**@type { number[] } */
     const H = [
         0xC1059ED8,
         0x367CD507,
@@ -43,37 +27,41 @@ export function sha224(source) {
         0x64F98FA7,
         0xBEFA4FA4
     ];
-
-    const W = new Array(64);
-
-    for (let i = 0; i < blocksLength; i++) {
-        for (let t = 0; t < 16; t++) W[t] = buffer[(i * 16) + t];
-        for (let t = 16; t < 64; t++) W[t] = (σ1(W[t - 2]) + W[t - 7] + σ0(W[t - 15]) + W[t - 16]) >>> 0;
-
-        let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
-        
-        for (let t=0; t<64; t++) {
-            const T1 = h + Σ1(e) + Ch(e, f, g) + K[t] + W[t];
-            const T2 =     Σ0(a) + Maj(a, b, c);
-            h = g;
-            g = f;
-            f = e;
-            e = (d + T1) >>> 0;
-            d = c;
-            c = b;
-            b = a;
-            a = (T1 + T2) >>> 0;
+    
+    {
+        let byteIndex = 0;
+        const nonLastBlocks = payloadBlocks - 1;
+        for (let i = 0; i < nonLastBlocks; i++) {
+            for (let j = 0; j < 16; j++) {
+                block[j] =  uint8ArrayToUint32BE(source, byteIndex);
+                byteIndex += 4;
+            }
+            hash(H, W, block);
         }
-
-        H[0] = (H[0]+a) >>> 0;
-        H[1] = (H[1]+b) >>> 0;
-        H[2] = (H[2]+c) >>> 0;
-        H[3] = (H[3]+d) >>> 0;
-        H[4] = (H[4]+e) >>> 0;
-        H[5] = (H[5]+f) >>> 0;
-        H[6] = (H[6]+g) >>> 0;
-        H[7] = (H[7]+h) >>> 0;
+        {
+            const boundaries = msgLength - 3;
+            let blockIndex = 0;
+            for (;byteIndex < boundaries; blockIndex++, byteIndex += 4) {
+                block[blockIndex] = uint8ArrayToUint32BE(source, byteIndex);
+            }
+            block[blockIndex] = uint8TailToUint32BE(source, byteIndex, msgLength % 4, 0x80);
+            if (blockIndex >= 14) {
+                block.fill(0, blockIndex + 1);
+                hash(H, W, block);
+                block.fill(0, 0, 14);
+            } else {
+                block.fill(0, blockIndex + 1, 14);
+            }
+            uint64view.setBigUint64(0, BigInt(msgLength) * 8n, false);
+            const lenHigh = uint64view.getUint32(0, false);
+            const lenLow = uint64view.getUint32(4, false);
+    
+            block[14] = lenHigh;
+            block[15] = lenLow;
+            hash(H, W, block);
+        }
     }
+
 
     const result = new Uint8Array(28);
     for (let i = 0; i < 7; i++) {

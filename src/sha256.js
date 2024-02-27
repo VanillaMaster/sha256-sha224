@@ -39,7 +39,7 @@ export function sha256(source) {
             hash(H, W, block);
         }
         {
-            const boundaries = msgLength - 4;
+            const boundaries = msgLength - 3;
             let blockIndex = 0;
             for (;byteIndex < boundaries; blockIndex++, byteIndex += 4) {
                 block[blockIndex] = uint8ArrayToUint32BE(source, byteIndex);
