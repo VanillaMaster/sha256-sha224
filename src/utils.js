@@ -14,10 +14,10 @@ import { K } from "./constants.js";
  * @param { number } offset 
  */
 export function uint32ToUint8ArrayBE(value, target, offset) {
-    target[offset] = (value >>> 24) & 0xff;
-    target[offset + 1] = (value >>> 16) & 0xff;
-    target[offset + 2] = (value >>> 8) & 0xff;
-    target[offset + 3] = (value >>> 0) & 0xff;
+    target[offset + 0] = (value >>> 0x18) & 0xff;
+    target[offset + 1] = (value >>> 0x10) & 0xff;
+    target[offset + 2] = (value >>> 0x08) & 0xff;
+    target[offset + 3] = (value >>> 0x00) & 0xff;
 }
 
 /**
@@ -26,10 +26,10 @@ export function uint32ToUint8ArrayBE(value, target, offset) {
  */
 export function uint8ArrayToUint32BE(source, offset) {
     return (
-        (source[offset] << 24) |
-        (source[offset + 1] << 16) |
-        (source[offset + 2] << 8) |
-        (source[offset + 3] << 0)
+        (source[offset + 0] << 0x18) |
+        (source[offset + 1] << 0x10) |
+        (source[offset + 2] << 0x08) |
+        (source[offset + 3] << 0x00)
     ) >>> 0;
 }
 
@@ -43,25 +43,25 @@ export function uint8TailToUint32BE(source, offset, length, last) {
     switch (length) {
         case 0:
             return (
-                (last << 24)
+                (last << 0x18)
             ) >>> 0;
         case 1:
             return (
-                (source[offset] << 24) |
-                (last << 16)
+                (source[offset + 0] << 0x18) |
+                (last << 0x10)
             ) >>> 0
         case 2:
             return (
-                (source[offset] << 24) |
-                (source[offset + 1] << 16) |
-                (last << 8)
+                (source[offset + 0] << 0x18) |
+                (source[offset + 1] << 0x10) |
+                (last << 0x08)
             ) >>> 0
         case 3:
             return (
-                (source[offset] << 24) |
-                (source[offset + 1] << 16) |
-                (source[offset + 2] << 8) |
-                (last << 0)
+                (source[offset + 0] << 0x18) |
+                (source[offset + 1] << 0x10) |
+                (source[offset + 2] << 0x08) |
+                (last << 0x00)
             ) >>> 0
         default:
             throw new Error("unreachable");
@@ -110,8 +110,8 @@ export function hash(H, W, block) {
     let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
     
     for (let t = 0; t < 64; t++) {
-        const T1 = h + Σ1(e) + Ch(e, f, g) + K[t] + W[t];
-        const T2 = Σ0(a) + Maj(a, b, c);
+        const T1 = (h + Σ1(e) + Ch(e, f, g) + K[t] + W[t]) >>> 0;
+        const T2 = (Σ0(a) + Maj(a, b, c)) >>> 0;
 
         h = g;
         g = f;

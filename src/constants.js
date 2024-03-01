@@ -29,3 +29,27 @@ export const byteToHex = [
     "e0", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "ea", "eb", "ec", "ed", "ee", "ef",
     "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff"
 ];
+
+/**@type { readonly number[] } */
+export const sha256_H = [
+    0x6a09e667,
+    0xbb67ae85,
+    0x3c6ef372,
+    0xa54ff53a,
+    0x510e527f,
+    0x9b05688c,
+    0x1f83d9ab,
+    0x5be0cd19
+];
+
+/**@type { readonly number[] } */
+export const sha224_H = [
+    0xC1059ED8,
+    0x367CD507,
+    0x3070DD17,
+    0xF70E5939,
+    0xFFC00B31,
+    0x68581511,
+    0x64F98FA7,
+    0xBEFA4FA4
+];

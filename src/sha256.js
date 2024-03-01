@@ -1,8 +1,5 @@
-import { byteToHex } from "./constants.js";
+import { byteToHex, sha256_H } from "./constants.js";
 import { hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./utils.js";
-
-const uint64buffer = new ArrayBuffer(8);
-const uint64view = new DataView(uint64buffer);
 
 /**
  * @param { Uint8Array } source 
@@ -17,16 +14,7 @@ export function sha256(source) {
     /**@type { number[] } */
     const W = new Array(64);
     /**@type { number[] } */
-    const H = [
-        0x6a09e667,
-        0xbb67ae85,
-        0x3c6ef372,
-        0xa54ff53a,
-        0x510e527f,
-        0x9b05688c,
-        0x1f83d9ab,
-        0x5be0cd19
-    ];
+    const H = Array.from(sha256_H);
     
     {
         let byteIndex = 0;
@@ -52,12 +40,10 @@ export function sha256(source) {
             } else {
                 block.fill(0, blockIndex + 1, 14);
             }
-            uint64view.setBigUint64(0, BigInt(msgLength) * 8n, false);
-            const lenHigh = uint64view.getUint32(0, false);
-            const lenLow = uint64view.getUint32(4, false);
-    
-            block[14] = lenHigh;
-            block[15] = lenLow;
+
+            block[14] = (msgLength >>> 29);
+            block[15] = ((msgLength << 3) >>> 0);
+
             hash(H, W, block);
         }
     }
@@ -66,7 +52,8 @@ export function sha256(source) {
     for (let i = 0; i < 8; i++) {
         uint32ToUint8ArrayBE(H[i], result, i * 4);
     }
-    return result.buffer;
+    // return result.buffer;
+    return result;
 }
 
 /**
@@ -74,37 +61,37 @@ export function sha256(source) {
  */
 export function stringify(source) {
     return (
-        byteToHex[source[0]] +
-        byteToHex[source[1]] +
-        byteToHex[source[2]] +
-        byteToHex[source[3]] +
-        byteToHex[source[4]] +
-        byteToHex[source[5]] +
-        byteToHex[source[6]] +
-        byteToHex[source[7]] +
-        byteToHex[source[8]] +
-        byteToHex[source[9]] +
-        byteToHex[source[10]] +
-        byteToHex[source[11]] +
-        byteToHex[source[12]] +
-        byteToHex[source[13]] +
-        byteToHex[source[14]] +
-        byteToHex[source[15]] +
-        byteToHex[source[16]] +
-        byteToHex[source[17]] +
-        byteToHex[source[18]] +
-        byteToHex[source[19]] +
-        byteToHex[source[20]] +
-        byteToHex[source[21]] +
-        byteToHex[source[22]] +
-        byteToHex[source[23]] +
-        byteToHex[source[24]] +
-        byteToHex[source[25]] +
-        byteToHex[source[26]] +
-        byteToHex[source[27]] +
-        byteToHex[source[28]] +
-        byteToHex[source[29]] +
-        byteToHex[source[30]] +
-        byteToHex[source[31]]
+        byteToHex[source[0x00]] +
+        byteToHex[source[0x01]] +
+        byteToHex[source[0x02]] +
+        byteToHex[source[0x03]] +
+        byteToHex[source[0x04]] +
+        byteToHex[source[0x05]] +
+        byteToHex[source[0x06]] +
+        byteToHex[source[0x07]] +
+        byteToHex[source[0x08]] +
+        byteToHex[source[0x09]] +
+        byteToHex[source[0x0A]] +
+        byteToHex[source[0x0B]] +
+        byteToHex[source[0x0C]] +
+        byteToHex[source[0x0D]] +
+        byteToHex[source[0x0E]] +
+        byteToHex[source[0x0F]] +
+        byteToHex[source[0x10]] +
+        byteToHex[source[0x11]] +
+        byteToHex[source[0x12]] +
+        byteToHex[source[0x13]] +
+        byteToHex[source[0x14]] +
+        byteToHex[source[0x15]] +
+        byteToHex[source[0x16]] +
+        byteToHex[source[0x17]] +
+        byteToHex[source[0x18]] +
+        byteToHex[source[0x19]] +
+        byteToHex[source[0x1A]] +
+        byteToHex[source[0x1B]] +
+        byteToHex[source[0x1C]] +
+        byteToHex[source[0x1D]] +
+        byteToHex[source[0x1E]] +
+        byteToHex[source[0x1F]]
     ).toLowerCase();
 }
