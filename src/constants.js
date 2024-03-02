@@ -30,18 +30,6 @@ export const byteToHex = [
     "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff"
 ];
 
-/**@type { readonly number[] } */
-export const sha256_H = [
-    0x6a09e667,
-    0xbb67ae85,
-    0x3c6ef372,
-    0xa54ff53a,
-    0x510e527f,
-    0x9b05688c,
-    0x1f83d9ab,
-    0x5be0cd19
-];
-
 export const __W = Symbol("W");
 export const __H = Symbol("H");
 export const __block = Symbol("block");

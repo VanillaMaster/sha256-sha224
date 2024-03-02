@@ -1,4 +1,4 @@
-import { __H, __W, __block, __byteLength, __blockOffset, __buffer, byteToHex, sha256_H, __bufferOffset } from "./constants.js";
+import { __H, __W, __block, __byteLength, __blockOffset, __buffer, byteToHex, __bufferOffset } from "./constants.js";
 import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./common.js";
 
 /**
