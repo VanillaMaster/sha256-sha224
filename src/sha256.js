@@ -1,5 +1,5 @@
 import { __H, __W, __block, __byteLength, __blockOffset, __buffer, byteToHex, sha256_H, __bufferOffset } from "./constants.js";
-import { hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./utils.js";
+import { finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./utils.js";
 
 
 
@@ -91,8 +91,8 @@ export class SHA256 {
             }
         }
 
-        const __length = data.length - 4;
-        for (; i<= __length; i += 4) {
+        const l = data.length - 4;
+        for (; i <= l; i += 4) {
             block[blockOffset++] = uint8ArrayToUint32BE(data, i);
             if (blockOffset == 16) {
                 hash(this[__H], this[__W], block);
@@ -123,31 +123,20 @@ export class SHA256 {
     }
 
     /**
-     * @param {*} [encoding] 
+     * @param { Uint8Array } [out] 
      */
-    digest(encoding) {
-        const block = this[__block];
-        const byteLength = this[__byteLength];
+    digest(out = new Uint8Array(32)) {
         const H = this[__H];
-        const W = this[__W];
-        let blockOffset = this[__blockOffset];
-        block[blockOffset++] = uint8TailToUint32BE(this[__buffer], 0, this[__bufferOffset], 0x80)
-        if (blockOffset > 14) {
-            block.fill(0, blockOffset);
-            hash(H, W, block);
-            block.fill(0, 0, 14);
-        } else {
-            block.fill(0, blockOffset, 14);
-        }
-        block[14] = (byteLength >>> 29);
-        block[15] = ((byteLength << 3) >>> 0);
-        hash(H, W, block);
+        finalize(this[__block], this[__buffer], H, this[__W], this[__blockOffset], this[__bufferOffset], this[__byteLength]);
+        for (let i = 0; i < 8; i++) uint32ToUint8ArrayBE(H[i], out, i * 4);
+        return out;
+    }
 
-        const result = new Uint8Array(32);
-        for (let i = 0; i < 8; i++) {
-            uint32ToUint8ArrayBE(H[i], result, i * 4);
-        }
-        return result;
+    /**
+     * @param { Uint8Array } source 
+     */
+    static from(source) {
+        return sha256(source);
     }
 }
 

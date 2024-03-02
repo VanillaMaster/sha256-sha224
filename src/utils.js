@@ -132,3 +132,26 @@ export function hash(H, W, block) {
     H[6] = (H[6] + g) >>> 0;
     H[7] = (H[7] + h) >>> 0;
 }
+
+/**
+ * @param { number[] } block 
+ * @param { number[] } buffer 
+ * @param { number[] } H 
+ * @param { number[] } W 
+ * @param { number } blockOffset 
+ * @param { number } bufferOffset 
+ * @param { number } byteLength 
+ */
+export function finalize(block, buffer, H, W, blockOffset, bufferOffset, byteLength) {
+    block[blockOffset++] = uint8TailToUint32BE(buffer, 0, bufferOffset, 0x80)
+    if (blockOffset > 14) {
+        block.fill(0, blockOffset);
+        hash(H, W, block);
+        block.fill(0, 0, 14);
+    } else {
+        block.fill(0, blockOffset, 14);
+    }
+    block[14] = (byteLength >>> 29);
+    block[15] = ((byteLength << 3) >>> 0);
+    hash(H, W, block);
+}

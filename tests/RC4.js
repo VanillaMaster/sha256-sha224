@@ -43,14 +43,13 @@ export function* PRGA(S) {
 
 /**
  * @template T
+ * @template { { readonly length: number; [n: number]: T; } } O
  * @param { Generator<T, never, never> } iterator 
- * @param { number } length 
+ * @param { O } out 
  */
-export function unpack(iterator, length) {
-    /**@type { T[] } */
-    const result = new Array(length);
-    for (let i = 0; i < length; i++) {
-        result[i] = iterator.next().value;
+export function unpack(iterator, out) {
+    for (let i = 0; i < out.length; i++) {
+        out[i] = iterator.next().value;
     }
-    return result
+    return out
 }
