@@ -6,30 +6,37 @@ import { finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailTo
 export class SHA256 {
     constructor(){}
     /**
+     * @private
      * @type { number }
      */
     [__byteLength] = 0;
     /**
+     * @private
      * @type { number }
-     */
+    */
     [__blockOffset] = 0;
     /**
+     * @private
      * @type { number }
      */
     [__bufferOffset] = 0;
     /**
+     * @private
      * @type { number[] }
      */
     [__block] = new Array(16);
     /**
+     * @private
      * @type { number[] }
      */
     [__buffer] = new Array(4);
     /**
+     * @private
      * @type { number[] }
      */
     [__W] = new Array(64);
     /**
+     * @private
      * @type { number[] }
      */
     [__H] = Array.from(sha256_H);
@@ -54,6 +61,10 @@ export class SHA256 {
                 switch (data.length) {
                     case 1:
                         buffer[bufferOffset] = data[0];
+                        /**
+                         * this modifier to fix wired bug in current ts server
+                         * @private
+                         */
                         this[__bufferOffset] = bufferOffset + 1;
                         break;
                     case 2:
@@ -99,6 +110,10 @@ export class SHA256 {
                 blockOffset = 0;
             }
         }
+        /**
+         * this modifier to fix wired bug in current ts server
+         * @private
+         */
         this[__blockOffset] = blockOffset;
         switch (data.length - i) {
             case 0:
