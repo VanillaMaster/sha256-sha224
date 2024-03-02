@@ -1,7 +1,16 @@
-# sha256 / sha224
+# @vanilla/sha
 zero-dependencies, pure javascript implementation of sha256 / sha224
 
 *it also must be fast, not like rust, obviously*
+
+## requirements
+*none*
+
+## installation
+```
+npm install git+https://github.com/VanillaMaster/sha256-sha224.git
+```
+
 ## example
 ```JavaScript
 import { sha256, stringify } from "@vanilla/sha/256";
@@ -26,3 +35,9 @@ hasher.update(data);
 const hashBuffer = hasher.digest();
 const hash = stringify(hashBuffer);
 ```
+
+## tests
+```
+npm run tests
+```
+> ***NOTE:*** run all tests requires 10+ hours
