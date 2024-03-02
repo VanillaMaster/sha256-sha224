@@ -1,6 +1,22 @@
 import { __H, __W, __block, __blockOffset, __buffer, __bufferOffset, __byteLength, byteToHex } from "./constants.js";
 import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./common.js";
 
+/**
+ * Utility class that lets you incrementally compute a hash.
+ * 
+ * ```JavaScript
+ * const text = "Lorem ipsum dolor sit, amet consectetur adipisicing elit."
+ * 
+ * const encoder = new TextEncoder();
+ * const data = encoder.encode(text);
+ * const hasher = new Sha224();
+ * hasher.update(data);
+ * const hashBuffer = hasher.digest();
+ * const hash = stringify(hashBuffer);
+ * ```
+ * 
+ * [SHA RFC](https://www.rfc-editor.org/rfc/rfc4634.html)
+ */
 export class Sha224 extends CryptoHasher {
     constructor() {
         super([
@@ -28,6 +44,8 @@ export class Sha224 extends CryptoHasher {
     }
 
     /**
+     * alias for `sha256` function
+     * 
      * @param { Uint8Array } source 
      */
     static from(source) {
@@ -36,6 +54,19 @@ export class Sha224 extends CryptoHasher {
 }
 
 /**
+ * non-incremental sha-224 implementation,
+ * should be prefered over incremental implementation
+ * if all data containd in single chunk.
+ * 
+ * ```JavaScript
+ * const text = "Lorem ipsum dolor sit, amet consectetur adipisicing elit."
+ * const encoder = new TextEncoder();
+ * const data = encoder.encode(text);
+ * const hashBuffer = sha224(data);
+ * const hash = stringify(hashBuffer);
+ * ```
+ * 
+ * [SHA RFC](https://www.rfc-editor.org/rfc/rfc4634.html)
  * @param { Uint8Array } source 
  */
 export function sha224(source) {
@@ -90,6 +121,7 @@ export function sha224(source) {
 }
 
 /**
+ * convert 28-bit hash into hex string
  * @param { Uint8Array } source 
  */
 export function stringify(source) {
