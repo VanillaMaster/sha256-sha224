@@ -1,7 +1,7 @@
 import { createReadStream } from "node:fs"
 import { createInterface } from "node:readline";
 import { KSA, PRGA, unpack } from "./RC4.js"
-import { SHA256, sha256, stringify } from "../src/sha256.js";
+import { Sha256, stringify } from "../src/sha256.js";
 import { strict as assert } from "node:assert";
 import { Buffer } from "node:buffer";
 
@@ -24,7 +24,7 @@ for await (const line of rl) {
         switch (input) {
             case "RC4": {
                 const buffer = new Uint8Array(35);
-                const hasher = new SHA256();
+                const hasher = new Sha256();
                 let i = 0, l = octetLength - 35;
                 const iter = PRGA(KSA([0]));
                 for (; i <= l; i+= 35) {
@@ -44,7 +44,7 @@ for await (const line of rl) {
             case "MILLION_a": {
                 const source = new Uint8Array(1_000_000).fill(97);
     
-                const hasher = new SHA256();
+                const hasher = new Sha256();
                 hasher.update(source);
                 const hashBuffer = hasher.digest();
                 const hash = stringify(hashBuffer);
@@ -53,7 +53,7 @@ for await (const line of rl) {
             default: {
                 const source = new Uint8Array(Buffer.from(input, "hex"));
     
-                const hasher = new SHA256();
+                const hasher = new Sha256();
                 hasher.update(source);
                 const hashBuffer = hasher.digest();
                 const hash = stringify(hashBuffer);

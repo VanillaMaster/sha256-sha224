@@ -1,5 +1,39 @@
-import { byteToHex, sha224_H } from "./constants.js";
-import { hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./utils.js";
+import { __H, __W, __block, __blockOffset, __buffer, __bufferOffset, __byteLength, byteToHex } from "./constants.js";
+import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./common.js";
+
+export class Sha224 extends CryptoHasher {
+    constructor() {
+        super([
+            0xC1059ED8,
+            0x367CD507,
+            0x3070DD17,
+            0xF70E5939,
+            0xFFC00B31,
+            0x68581511,
+            0x64F98FA7,
+            0xBEFA4FA4
+        ]);
+    }
+
+    /**
+     * Finalize the hash
+     * 
+     * @param { Uint8Array } [out] 
+     */
+    digest(out = new Uint8Array(28)) {
+        const H = this[__H];
+        finalize(this[__block], this[__buffer], H, this[__W], this[__blockOffset], this[__bufferOffset], this[__byteLength]);
+        for (let i = 0; i < 7; i++) uint32ToUint8ArrayBE(H[i], out, i * 4);
+        return out;
+    }
+
+    /**
+     * @param { Uint8Array } source 
+     */
+    static from(source) {
+        return sha224(source);
+    }
+}
 
 /**
  * @param { Uint8Array } source 
@@ -14,14 +48,14 @@ export function sha224(source) {
     /**@type { number[] } */
     const W = new Array(64);
     /**@type { number[] } */
-    const H = Array.from(sha224_H)
-    
+    const H = [0xC1059ED8, 0x367CD507, 0x3070DD17, 0xF70E5939, 0xFFC00B31, 0x68581511, 0x64F98FA7, 0xBEFA4FA4];
+
     {
         let byteIndex = 0;
         const nonLastBlocks = payloadBlocks - 1;
         for (let i = 0; i < nonLastBlocks; i++) {
             for (let j = 0; j < 16; j++) {
-                block[j] =  uint8ArrayToUint32BE(source, byteIndex);
+                block[j] = uint8ArrayToUint32BE(source, byteIndex);
                 byteIndex += 4;
             }
             hash(H, W, block);
@@ -29,7 +63,7 @@ export function sha224(source) {
         {
             const boundaries = msgLength - 3;
             let blockIndex = 0;
-            for (;byteIndex < boundaries; blockIndex++, byteIndex += 4) {
+            for (; byteIndex < boundaries; blockIndex++, byteIndex += 4) {
                 block[blockIndex] = uint8ArrayToUint32BE(source, byteIndex);
             }
             block[blockIndex] = uint8TailToUint32BE(source, byteIndex, msgLength % 4, 0x80);
@@ -40,7 +74,7 @@ export function sha224(source) {
             } else {
                 block.fill(0, blockIndex + 1, 14);
             }
-            
+
             block[14] = (msgLength >>> 29);
             block[15] = ((msgLength << 3) >>> 0);
 
@@ -52,7 +86,6 @@ export function sha224(source) {
     for (let i = 0; i < 7; i++) {
         uint32ToUint8ArrayBE(H[i], result, i * 4);
     }
-    // return result.buffer;
     return result;
 }
 

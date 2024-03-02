@@ -1,4 +1,4 @@
-import { K } from "./constants.js";
+import { K, __H, __W, __block, __blockOffset, __buffer, __bufferOffset, __byteLength } from "./constants.js";
 /**
  * @template T
  * @typedef { { readonly length: number; [n: number]: T; } } ArrayLike 
@@ -154,4 +154,132 @@ export function finalize(block, buffer, H, W, blockOffset, bufferOffset, byteLen
     block[14] = (byteLength >>> 29);
     block[15] = ((byteLength << 3) >>> 0);
     hash(H, W, block);
+}
+
+export class CryptoHasher {
+    /**
+     * @param { number[] } init 
+     */
+    constructor(init) {
+        /**
+         * @type { number[] }
+         */
+        this[__H] = init;
+    }
+    /**
+     * @type { number }
+     */
+    [__byteLength] = 0;
+    /**
+     * @type { number }
+    */
+    [__blockOffset] = 0;
+    /**
+     * @type { number }
+     */
+    [__bufferOffset] = 0;
+    /**
+     * @type { number[] }
+     */
+    [__block] = new Array(16);
+    /**
+     * @type { number[] }
+     */
+    [__buffer] = new Array(4);
+    /**
+     * @type { number[] }
+     */
+    [__W] = new Array(64);
+
+    /**
+     * Update the hash with data
+     * 
+     * @param { Uint8Array } data 
+     */
+    update(data) {
+        if (data.length === 0) return;
+
+        this[__byteLength] += data.byteLength;
+        
+        let i = 0;
+        let blockOffset = this[__blockOffset];
+        
+        const bufferOffset = this[__bufferOffset];
+        const block = this[__block];
+        const buffer = this[__buffer];
+        const H = this[__H];
+        const W = this[__W];
+        
+        if (bufferOffset !== 0) {
+            if (data.length < (4 - bufferOffset)) {
+                switch (data.length) {
+                    case 1:
+                        buffer[bufferOffset] = data[0];
+                        this[__bufferOffset] = bufferOffset + 1;
+                        break;
+                    case 2:
+                        buffer[1] = data[0];
+                        buffer[2] = data[1];
+                        this[__bufferOffset] = 3;
+                        break;
+                    default: throw new Error();
+                }
+                return;
+            }
+            switch (bufferOffset) {
+                case 1:
+                    buffer[1] = data[0];
+                    buffer[2] = data[1];
+                    buffer[3] = data[2];
+                    i = 3;
+                    break;
+                case 2:
+                    buffer[2] = data[0];
+                    buffer[3] = data[1];
+                    i = 2;
+                    break;
+                case 3:
+                    buffer[3] = data[0];
+                    i = 1;
+                    break;
+                default: throw new Error();
+            }
+            this[__bufferOffset] = 0;
+            block[blockOffset++] = uint8ArrayToUint32BE(buffer, 0);
+            if (blockOffset === 16) {
+                hash(H, W, block);
+                blockOffset = 0;
+            }
+        }
+
+        const l = data.length - 4;
+        for (; i <= l; i += 4) {
+            block[blockOffset++] = uint8ArrayToUint32BE(data, i);
+            if (blockOffset == 16) {
+                hash(H, W, block);
+                blockOffset = 0;
+            }
+        }
+        this[__blockOffset] = blockOffset;
+        switch (data.length - i) {
+            case 0:
+                break;
+            case 1:
+                buffer[0] = data[i];
+                this[__bufferOffset] = 1;
+                break;
+            case 2:
+                buffer[0] = data[i];
+                buffer[1] = data[i + 1];
+                this[__bufferOffset] = 2;
+                break;
+            case 3:
+                buffer[0] = data[i];
+                buffer[1] = data[i + 1];
+                buffer[2] = data[i + 2];
+                this[__bufferOffset] = 3;
+                break;
+            default: throw new Error();
+        }
+    }
 }

@@ -1,143 +1,23 @@
 import { __H, __W, __block, __byteLength, __blockOffset, __buffer, byteToHex, sha256_H, __bufferOffset } from "./constants.js";
-import { finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./utils.js";
+import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./common.js";
 
-
-
-export class SHA256 {
-    constructor(){}
-    /**
-     * @private
-     * @type { number }
-     */
-    [__byteLength] = 0;
-    /**
-     * @private
-     * @type { number }
-    */
-    [__blockOffset] = 0;
-    /**
-     * @private
-     * @type { number }
-     */
-    [__bufferOffset] = 0;
-    /**
-     * @private
-     * @type { number[] }
-     */
-    [__block] = new Array(16);
-    /**
-     * @private
-     * @type { number[] }
-     */
-    [__buffer] = new Array(4);
-    /**
-     * @private
-     * @type { number[] }
-     */
-    [__W] = new Array(64);
-    /**
-     * @private
-     * @type { number[] }
-     */
-    [__H] = Array.from(sha256_H);
-
-    /**
-     * @param { Uint8Array } data 
-     */
-    update(data) {
-        if (data.length === 0) return;
-
-        this[__byteLength] += data.byteLength;
-        
-        let i = 0;
-        let blockOffset = this[__blockOffset];
-        
-        const bufferOffset = this[__bufferOffset];
-        const block = this[__block];
-        const buffer = this[__buffer];
-        
-        if (bufferOffset !== 0) {
-            if (data.length < (4 - bufferOffset)) {
-                switch (data.length) {
-                    case 1:
-                        buffer[bufferOffset] = data[0];
-                        /**
-                         * this modifier to fix wired bug in current ts server
-                         * @private
-                         */
-                        this[__bufferOffset] = bufferOffset + 1;
-                        break;
-                    case 2:
-                        buffer[1] = data[0];
-                        buffer[2] = data[1];
-                        this[__bufferOffset] = 3;
-                        break;
-                    default: debugger;
-                }
-                return;
-            }
-            switch (bufferOffset) {
-                case 1:
-                    buffer[1] = data[0];
-                    buffer[2] = data[1];
-                    buffer[3] = data[2];
-                    i = 3;
-                    break;
-                case 2:
-                    buffer[2] = data[0];
-                    buffer[3] = data[1];
-                    i = 2;
-                    break;
-                case 3:
-                    buffer[3] = data[0];
-                    i = 1;
-                    break;
-                default: debugger;
-            }
-            this[__bufferOffset] = 0;
-            block[blockOffset++] = uint8ArrayToUint32BE(buffer, 0);
-            if (blockOffset === 16) {
-                hash(this[__H], this[__W], block);
-                blockOffset = 0;
-            }
-        }
-
-        const l = data.length - 4;
-        for (; i <= l; i += 4) {
-            block[blockOffset++] = uint8ArrayToUint32BE(data, i);
-            if (blockOffset == 16) {
-                hash(this[__H], this[__W], block);
-                blockOffset = 0;
-            }
-        }
-        /**
-         * this modifier to fix wired bug in current ts server
-         * @private
-         */
-        this[__blockOffset] = blockOffset;
-        switch (data.length - i) {
-            case 0:
-                break;
-            case 1:
-                buffer[0] = data[i];
-                this[__bufferOffset] = 1;
-                break;
-            case 2:
-                buffer[0] = data[i];
-                buffer[1] = data[i + 1];
-                this[__bufferOffset] = 2;
-                break;
-            case 3:
-                buffer[0] = data[i];
-                buffer[1] = data[i + 1];
-                buffer[2] = data[i + 2];
-                this[__bufferOffset] = 3;
-                break;
-            default: debugger;
-        }
+export class Sha256 extends CryptoHasher {
+    constructor() {
+        super([
+            0x6a09e667,
+            0xbb67ae85,
+            0x3c6ef372,
+            0xa54ff53a,
+            0x510e527f,
+            0x9b05688c,
+            0x1f83d9ab,
+            0x5be0cd19
+        ]);
     }
 
     /**
+     * Finalize the hash
+     * 
      * @param { Uint8Array } [out] 
      */
     digest(out = new Uint8Array(32)) {
@@ -168,14 +48,14 @@ export function sha256(source) {
     /**@type { number[] } */
     const W = new Array(64);
     /**@type { number[] } */
-    const H = Array.from(sha256_H);
-    
+    const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+
     {
         let byteIndex = 0;
         const nonLastBlocks = payloadBlocks - 1;
         for (let i = 0; i < nonLastBlocks; i++) {
             for (let j = 0; j < 16; j++) {
-                block[j] =  uint8ArrayToUint32BE(source, byteIndex);
+                block[j] = uint8ArrayToUint32BE(source, byteIndex);
                 byteIndex += 4;
             }
             hash(H, W, block);
@@ -183,7 +63,7 @@ export function sha256(source) {
         {
             const boundaries = msgLength - 3;
             let blockIndex = 0;
-            for (;byteIndex < boundaries; blockIndex++, byteIndex += 4) {
+            for (; byteIndex < boundaries; blockIndex++, byteIndex += 4) {
                 block[blockIndex] = uint8ArrayToUint32BE(source, byteIndex);
             }
             block[blockIndex] = uint8TailToUint32BE(source, byteIndex, msgLength % 4, 0x80);

@@ -42,18 +42,6 @@ export const sha256_H = [
     0x5be0cd19
 ];
 
-/**@type { readonly number[] } */
-export const sha224_H = [
-    0xC1059ED8,
-    0x367CD507,
-    0x3070DD17,
-    0xF70E5939,
-    0xFFC00B31,
-    0x68581511,
-    0x64F98FA7,
-    0xBEFA4FA4
-];
-
 export const __W = Symbol("W");
 export const __H = Symbol("H");
 export const __block = Symbol("block");
