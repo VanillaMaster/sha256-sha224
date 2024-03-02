@@ -53,3 +53,11 @@ export const sha224_H = [
     0x64F98FA7,
     0xBEFA4FA4
 ];
+
+export const __W = Symbol("W");
+export const __H = Symbol("H");
+export const __block = Symbol("block");
+export const __buffer = Symbol("buffer");
+export const __byteLength = Symbol("byteLength");
+export const __blockOffset = Symbol("blockOffset");
+export const __bufferOffset = Symbol("bufferOffset");

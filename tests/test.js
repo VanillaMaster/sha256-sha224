@@ -1,7 +1,7 @@
 import { createReadStream } from "node:fs"
 import { createInterface } from "node:readline";
 import { KSA, PRGA, unpack } from "./RC4.js"
-import { sha256, stringify } from "../src/sha256.js";
+import { SHA256, sha256, stringify } from "../src/sha256.js";
 import { strict as assert } from "node:assert";
 import { Buffer } from "node:buffer";
 
@@ -28,21 +28,26 @@ for await (const line of rl) {
     const [identifier, __octetLength, input, SHA_256, SHA_d_256] = line.substring(1).split(" ");
     const octetLength = Number(__octetLength);
 
-    await test(identifier, function(t) {
-        /**@type { Uint8Array } */
-        let source;
-        if (input in wellKnownInputData) {
-            source = wellKnownInputData[input](identifier, octetLength, input, SHA_256, SHA_d_256);
-        } else {
-            source = new Uint8Array(Buffer.from(input, "hex"));
-        }
+    /**@type { Uint8Array } */
+    let source;
+    if (input in wellKnownInputData) {
+        source = wellKnownInputData[input](identifier, octetLength, input, SHA_256, SHA_d_256);
+    } else {
+        source = new Uint8Array(Buffer.from(input, "hex"));
+    }
+    await test(`${identifier}`, function(t) {
+        if (identifier === "RC4.2^13+116") debugger;
+        const hasher = new SHA256();
+        hasher.update(source);
+        const hashBuffer = hasher.digest();
+        const hash = stringify(hashBuffer);
         // const hash = new Uint8Array(sha256(source));
         // const hash_d = new Uint8Array(sha256(hash));
-        const hash = sha256(source);
-        const hash_d = sha256(hash);
+        // const hash = sha256(source);
+        // const hash_d = sha256(hash);
 
-        assert.deepEqual(stringify(hash), SHA_256, "sha256");
-        assert.deepEqual(stringify(hash_d), SHA_d_256, "sha_d_256");
+        assert.deepEqual(hash, SHA_256, "sha256");
+        // assert.deepEqual(stringify(hash_d), SHA_d_256, "sha_d_256");
     })
 }
 

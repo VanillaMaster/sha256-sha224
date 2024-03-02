@@ -1,5 +1,155 @@
-import { byteToHex, sha256_H } from "./constants.js";
+import { __H, __W, __block, __byteLength, __blockOffset, __buffer, byteToHex, sha256_H, __bufferOffset } from "./constants.js";
 import { hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./utils.js";
+
+
+
+export class SHA256 {
+    constructor(){}
+    /**
+     * @type { number }
+     */
+    [__byteLength] = 0;
+    /**
+     * @type { number }
+     */
+    [__blockOffset] = 0;
+    /**
+     * @type { number }
+     */
+    [__bufferOffset] = 0;
+    /**
+     * @type { number[] }
+     */
+    [__block] = new Array(16);
+    /**
+     * @type { number[] }
+     */
+    [__buffer] = new Array(4);
+    /**
+     * @type { number[] }
+     */
+    [__W] = new Array(64);
+    /**
+     * @type { number[] }
+     */
+    [__H] = Array.from(sha256_H);
+
+    /**
+     * @param { Uint8Array } data 
+     */
+    update(data) {
+        if (data.length === 0) return;
+
+        this[__byteLength] += data.byteLength;
+        
+        let i = 0;
+        let blockOffset = this[__blockOffset];
+        
+        const bufferOffset = this[__bufferOffset];
+        const block = this[__block];
+        const buffer = this[__buffer];
+        
+        if (bufferOffset !== 0) {
+            if (data.length < (4 - bufferOffset)) {
+                switch (data.length) {
+                    case 1:
+                        buffer[bufferOffset] = data[0];
+                        this[__bufferOffset] = bufferOffset + 1;
+                        break;
+                    case 2:
+                        buffer[1] = data[0];
+                        buffer[2] = data[1];
+                        this[__bufferOffset] = 3;
+                        break;
+                    default: debugger;
+                }
+                return;
+            }
+            switch (bufferOffset) {
+                case 1:
+                    buffer[1] = data[0];
+                    buffer[2] = data[1];
+                    buffer[3] = data[2];
+                    i = 3;
+                    break;
+                case 2:
+                    buffer[2] = data[0];
+                    buffer[3] = data[1];
+                    i = 2;
+                    break;
+                case 3:
+                    buffer[3] = data[0];
+                    i = 1;
+                    break;
+                default: debugger;
+            }
+            this[__bufferOffset] = 0;
+            block[blockOffset++] = uint8ArrayToUint32BE(buffer, 0);
+            if (blockOffset === 16) {
+                hash(this[__H], this[__W], block);
+                blockOffset = 0;
+            }
+        }
+
+        const __length = data.length - 4;
+        for (; i<= __length; i += 4) {
+            block[blockOffset++] = uint8ArrayToUint32BE(data, i);
+            if (blockOffset == 16) {
+                hash(this[__H], this[__W], block);
+                blockOffset = 0;
+            }
+        }
+        this[__blockOffset] = blockOffset;
+        switch (data.length - i) {
+            case 0:
+                break;
+            case 1:
+                buffer[0] = data[i];
+                this[__bufferOffset] = 1;
+                break;
+            case 2:
+                buffer[0] = data[i];
+                buffer[1] = data[i + 1];
+                this[__bufferOffset] = 2;
+                break;
+            case 3:
+                buffer[0] = data[i];
+                buffer[1] = data[i + 1];
+                buffer[2] = data[i + 2];
+                this[__bufferOffset] = 3;
+                break;
+            default: debugger;
+        }
+    }
+
+    /**
+     * @param {*} [encoding] 
+     */
+    digest(encoding) {
+        const block = this[__block];
+        const byteLength = this[__byteLength];
+        const H = this[__H];
+        const W = this[__W];
+        let blockOffset = this[__blockOffset];
+        block[blockOffset++] = uint8TailToUint32BE(this[__buffer], 0, this[__bufferOffset], 0x80)
+        if (blockOffset > 14) {
+            block.fill(0, blockOffset);
+            hash(H, W, block);
+            block.fill(0, 0, 14);
+        } else {
+            block.fill(0, blockOffset, 14);
+        }
+        block[14] = (byteLength >>> 29);
+        block[15] = ((byteLength << 3) >>> 0);
+        hash(H, W, block);
+
+        const result = new Uint8Array(32);
+        for (let i = 0; i < 8; i++) {
+            uint32ToUint8ArrayBE(H[i], result, i * 4);
+        }
+        return result;
+    }
+}
 
 /**
  * @param { Uint8Array } source 
