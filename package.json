@@ -3,6 +3,10 @@
         "name": "vanilla",
         "url": "https://github.com/VanillaMaster"
     },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/VanillaMaster/sha256-sha224.git"
+    },
     "name": "@vanilla/sha",
     "version": "1.0.0",
     "private": true,
@@ -23,11 +27,7 @@
         "src/**/*"
     ],
     "scripts": {
-        "test": "node --test ./tests/test.js",
-        "build:types": "tsc -p jsconfig.json"
+        "test": "node --test ./tests/test.js"
     },
-    "license": "ISC",
-    "devDependencies": {
-        "typescript": "^5.3.3"
-    }
+    "license": "ISC"
 }
