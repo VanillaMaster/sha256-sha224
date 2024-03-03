@@ -1,11 +1,23 @@
 import { createReadStream } from "node:fs"
 import { createInterface } from "node:readline";
+import test from 'node:test';
+
 import { KSA, PRGA, unpack } from "./RC4.js"
 import { Sha256, stringify } from "../src/sha256.js";
 import { strict as assert } from "node:assert";
-import { Buffer } from "node:buffer";
 
-import test from 'node:test';
+
+/**
+ * @param { string } source 
+ */
+function fromHex(source){
+    if ((source.length & 0b1) === 1) throw new Error();
+    const buffer = new Uint8Array(source.length >>> 1);
+    for (let i = 0, j = 0, k = 2; i < buffer.length; i++, j = k, k += 2) {
+        buffer[i] = Number.parseInt(source.substring(j, k), 16);
+    }
+    return buffer;
+}
 
 const fileStream = createReadStream("./tests/SHAd256_Test_Vectors.txt");
 const rl = createInterface({
@@ -51,7 +63,7 @@ for await (const line of rl) {
                 assert.deepEqual(hash, SHA_256, "sha256");
             } break;
             default: {
-                const source = new Uint8Array(Buffer.from(input, "hex"));
+                const source = new Uint8Array(fromHex(input));
     
                 const hasher = new Sha256();
                 hasher.update(source);
