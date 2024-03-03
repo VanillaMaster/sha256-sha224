@@ -222,7 +222,7 @@ export class CryptoHasher {
                         buffer[2] = data[1];
                         this[__bufferOffset] = 3;
                         break;
-                    default: throw new Error();
+                    default: throw new Error("unreachable");
                 }
                 return;
             }
@@ -242,7 +242,7 @@ export class CryptoHasher {
                     buffer[3] = data[0];
                     i = 1;
                     break;
-                default: throw new Error();
+                default: throw new Error("unreachable");
             }
             this[__bufferOffset] = 0;
             block[blockOffset++] = uint8ArrayToUint32BE(buffer, 0);
@@ -279,7 +279,7 @@ export class CryptoHasher {
                 buffer[2] = data[i + 2];
                 this[__bufferOffset] = 3;
                 break;
-            default: throw new Error();
+            default: throw new Error("unreachable");
         }
     }
 }
