@@ -4,6 +4,8 @@ import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32B
 /**
  * Utility class that lets you incrementally compute a hash.
  * 
+ * #### Example:
+ * 
  * ```JavaScript
  * const text = "Lorem ipsum dolor sit, amet consectetur adipisicing elit."
  * 
@@ -15,7 +17,19 @@ import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32B
  * const hash = stringify(hashBuffer);
  * ```
  * 
+ * #### Reference:
+ * 
  * [SHA RFC](https://www.rfc-editor.org/rfc/rfc4634.html)
+ * 
+ * #### Notes:
+ *  * inernaly used 4 arrays (length of 4, 8, 16 and 64),
+ *    so creation of class instance produce 5
+ *    (6 if `digest` method called without passing pre-existing container) objects,
+ *    which must be garbage collected at the end, if performance is critical
+ *    ~pure javascript implementation should not be used~
+ *    internal counters could be setted to `0` manually
+ *    (`__byteLength`, `__blockOffset`, `__bufferOffset`),
+ *    to allow re-use of existing instance.
  */
 export class Sha224 extends CryptoHasher {
     constructor() {
@@ -32,9 +46,10 @@ export class Sha224 extends CryptoHasher {
     }
 
     /**
-     * Finalize the hash
+     * Finalize the hash,
+     * optionally method can write the hash into a pre-existing `Uint8Array` instance.
      * 
-     * @param { Uint8Array } [out] 
+     * @param { Uint8Array } [out] array to write has into (28 byts)
      */
     digest(out = new Uint8Array(28)) {
         const H = this[__H];
@@ -45,18 +60,21 @@ export class Sha224 extends CryptoHasher {
 
     /**
      * alias for `sha256` function
-     * 
-     * @param { Uint8Array } source 
      */
-    static from(source) {
-        return sha224(source);
-    }
+    static from = sha224;
+
+    /**
+     * alias for `stringify` function
+     */
+    static stringify = stringify;
 }
 
 /**
  * non-incremental sha-224 implementation,
  * should be prefered over incremental implementation
  * if all data containd in single chunk.
+ * 
+ * #### Example:
  * 
  * ```JavaScript
  * const text = "Lorem ipsum dolor sit, amet consectetur adipisicing elit."
@@ -66,7 +84,10 @@ export class Sha224 extends CryptoHasher {
  * const hash = stringify(hashBuffer);
  * ```
  * 
+ * #### Reference:
+ * 
  * [SHA RFC](https://www.rfc-editor.org/rfc/rfc4634.html)
+ * 
  * @param { Uint8Array } source 
  */
 export function sha224(source) {
