@@ -1,4 +1,7 @@
-import { __H, __W, __block, __blockOffset, __buffer, __bufferOffset, __byteLength, byteToHex } from "./constants.js";
+/**
+ * @typedef { import("./common.js").buffer } buffer
+ */
+import { __H, __W, __block, __blockOffset, __buffer, __bufferOffset, __byteLength, byteToHex, sha224_H, sha256_H } from "./constants.js";
 import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./common.js";
 
 /**
@@ -33,16 +36,7 @@ import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32B
  */
 export class Sha224 extends CryptoHasher {
     constructor() {
-        super([
-            0xC1059ED8,
-            0x367CD507,
-            0x3070DD17,
-            0xF70E5939,
-            0xFFC00B31,
-            0x68581511,
-            0x64F98FA7,
-            0xBEFA4FA4
-        ]);
+        super(sha256_H);
     }
 
     /**
@@ -95,12 +89,13 @@ export function sha224(source) {
     const payloadLength = msgLength + 1;
     const payloadBlocks = Math.ceil(payloadLength / 64);
 
-    /**@type { number[] } */
-    const block = new Array(16);
-    /**@type { number[] } */
-    const W = new Array(64);
-    /**@type { number[] } */
-    const H = [0xC1059ED8, 0x367CD507, 0x3070DD17, 0xF70E5939, 0xFFC00B31, 0x68581511, 0x64F98FA7, 0xBEFA4FA4];
+    /**@type { buffer } */
+    const block = new Uint32Array(16);//new Array(16);
+    /**@type { buffer } */
+    const W = new Uint32Array(64);//new Array(64);
+    /**@type { buffer } */
+    const H = new Uint32Array(8);//[0xC1059ED8, 0x367CD507, 0x3070DD17, 0xF70E5939, 0xFFC00B31, 0x68581511, 0x64F98FA7, 0xBEFA4FA4];
+    H.set(sha224_H);
 
     {
         let byteIndex = 0;

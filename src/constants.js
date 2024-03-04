@@ -1,5 +1,5 @@
-/**@type { readonly number[] } */
-export const K = [
+/**@type { Uint32Array } */
+export const K = new Uint32Array([
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -8,7 +8,7 @@ export const K = [
     0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-];
+]);
 
 /**@type { readonly string[] } */
 export const byteToHex = [
@@ -29,6 +29,56 @@ export const byteToHex = [
     "e0", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "ea", "eb", "ec", "ed", "ee", "ef",
     "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "fa", "fb", "fc", "fd", "fe", "ff"
 ];
+
+/**
+ * ```JavaScript
+ * [
+ *     0x6a09e667,
+ *     0xbb67ae85,
+ *     0x3c6ef372,
+ *     0xa54ff53a,
+ *     0x510e527f,
+ *     0x9b05688c,
+ *     0x1f83d9ab,
+ *     0x5be0cd19
+ * ]
+ * ```
+ */
+export const sha256_H = new Uint32Array([
+    0x6a09e667,
+    0xbb67ae85,
+    0x3c6ef372,
+    0xa54ff53a,
+    0x510e527f,
+    0x9b05688c,
+    0x1f83d9ab,
+    0x5be0cd19
+]);
+
+/**
+ * ```JavaScript
+ * [
+ *     0xC1059ED8,
+ *     0x367CD507,
+ *     0x3070DD17,
+ *     0xF70E5939,
+ *     0xFFC00B31,
+ *     0x68581511,
+ *     0x64F98FA7,
+ *     0xBEFA4FA4
+ * ]
+ * ```
+ */
+export const sha224_H = new Uint32Array([
+    0xC1059ED8,
+    0x367CD507,
+    0x3070DD17,
+    0xF70E5939,
+    0xFFC00B31,
+    0x68581511,
+    0x64F98FA7,
+    0xBEFA4FA4
+]);
 
 export const __W = Symbol("W");
 export const __H = Symbol("H");

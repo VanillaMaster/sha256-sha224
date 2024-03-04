@@ -7,6 +7,9 @@ import { K, __H, __W, __block, __blockOffset, __buffer, __bufferOffset, __byteLe
  * @template T
  * @typedef { { readonly length: number; readonly [n: number]: T; } } ReadonlyArrayLike 
  */
+/**
+ * @typedef { Uint32Array } buffer
+ */
 
 /**
  * @param { number } value 
@@ -98,9 +101,9 @@ export function Ch(x, y, z) { return (x & y) ^ (~x & z) }
 export function Maj(x, y, z) { return (x & y) ^ (x & z) ^ (y & z) }
 
 /**
- * @param { number[] } H 
- * @param { number[] } W 
- * @param { number[] } block 
+ * @param { buffer } H 
+ * @param { buffer } W 
+ * @param { buffer } block 
  */
 export function hash(H, W, block) {
     for (let t = 0; t < 16; t++) W[t] = block[t];
@@ -108,7 +111,7 @@ export function hash(H, W, block) {
     for (let t = 16; t < 64; t++) W[t] = (σ1(W[t - 2]) + W[t - 7] + σ0(W[t - 15]) + W[t - 16]) >>> 0;
 
     let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
-    
+
     for (let t = 0; t < 64; t++) {
         const T1 = (h + Σ1(e) + Ch(e, f, g) + K[t] + W[t]) >>> 0;
         const T2 = (Σ0(a) + Maj(a, b, c)) >>> 0;
@@ -134,10 +137,10 @@ export function hash(H, W, block) {
 }
 
 /**
- * @param { number[] } block 
- * @param { number[] } buffer 
- * @param { number[] } H 
- * @param { number[] } W 
+ * @param { buffer } block 
+ * @param { buffer } buffer 
+ * @param { buffer } H 
+ * @param { buffer } W 
  * @param { number } blockOffset 
  * @param { number } bufferOffset 
  * @param { number } byteLength 
@@ -158,14 +161,15 @@ export function finalize(block, buffer, H, W, blockOffset, bufferOffset, byteLen
 
 export class CryptoHasher {
     /**
-     * @param { number[] } init 
+     * @param { ReadonlyArrayLike<number>} init 
      */
     constructor(init) {
-        /**
-         * @type { number[] }
-         */
-        this[__H] = init;
+        this[__H].set(init);
     }
+    /**
+     * @type { buffer }
+     */
+    [__H] = new Uint32Array(8);
     /**
      * @type { number }
      */
@@ -179,17 +183,17 @@ export class CryptoHasher {
      */
     [__bufferOffset] = 0;
     /**
-     * @type { number[] }
+     * @type { buffer }
      */
-    [__block] = new Array(16);
+    [__block] = new Uint32Array(16);//new Array(16);
     /**
-     * @type { number[] }
+     * @type { buffer }
      */
-    [__buffer] = new Array(4);
+    [__buffer] = new Uint32Array(4);//new Array(4);
     /**
-     * @type { number[] }
+     * @type { buffer }
      */
-    [__W] = new Array(64);
+    [__W] = new Uint32Array(64);//new Array(64);
 
     /**
      * Update the hash with data
@@ -200,16 +204,16 @@ export class CryptoHasher {
         if (data.length === 0) return;
 
         this[__byteLength] += data.byteLength;
-        
+
         let i = 0;
         let blockOffset = this[__blockOffset];
-        
+
         const bufferOffset = this[__bufferOffset];
         const block = this[__block];
         const buffer = this[__buffer];
         const H = this[__H];
         const W = this[__W];
-        
+
         if (bufferOffset !== 0) {
             if (data.length < (4 - bufferOffset)) {
                 switch (data.length) {

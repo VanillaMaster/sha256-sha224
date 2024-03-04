@@ -1,4 +1,7 @@
-import { __H, __W, __block, __byteLength, __blockOffset, __buffer, byteToHex, __bufferOffset } from "./constants.js";
+/**
+ * @typedef { import("./common.js").buffer } buffer
+ */
+import { __H, __W, __block, __byteLength, __blockOffset, __buffer, byteToHex, __bufferOffset, sha256_H } from "./constants.js";
 import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32BE, uint8TailToUint32BE } from "./common.js";
 
 /**
@@ -33,16 +36,7 @@ import { CryptoHasher, finalize, hash, uint32ToUint8ArrayBE, uint8ArrayToUint32B
  */
 export class Sha256 extends CryptoHasher {
     constructor() {
-        super([
-            0x6a09e667,
-            0xbb67ae85,
-            0x3c6ef372,
-            0xa54ff53a,
-            0x510e527f,
-            0x9b05688c,
-            0x1f83d9ab,
-            0x5be0cd19
-        ]);
+        super(sha256_H);
     }
 
     /**
@@ -95,12 +89,13 @@ export function sha256(source) {
     const payloadLength = msgLength + 1;
     const payloadBlocks = Math.ceil(payloadLength / 64);
 
-    /**@type { number[] } */
-    const block = new Array(16);
-    /**@type { number[] } */
-    const W = new Array(64);
-    /**@type { number[] } */
-    const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    /**@type { buffer } */
+    const block = new Uint32Array(16);//new Array(16);
+    /**@type { buffer } */
+    const W = new Uint32Array(64);//new Array(64);
+    /**@type { buffer } */
+    const H = new Uint32Array(8);//[0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    H.set(sha256_H);
 
     {
         let byteIndex = 0;
