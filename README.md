@@ -8,8 +8,9 @@ zero-dependencies, pure javascript implementation of sha256 / sha224
 
 ## installation
 ```
-npm install git+https://github.com/VanillaMaster/sha256-sha224.git
+npm install github:vanillamaster/sha256-sha224
 ```
+> ***TIP:*** use [`#semver:<semver>`](https://docs.npmjs.com/cli/v9/commands/npm-install) syntax
 
 ## example
 ```JavaScript
