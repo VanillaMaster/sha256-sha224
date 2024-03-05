@@ -7,9 +7,6 @@ import { K, __H, __W, __block, __blockOffset, __buffer, __bufferOffset, __byteLe
  * @template T
  * @typedef { { readonly length: number; readonly [n: number]: T; } } ReadonlyArrayLike 
  */
-/**
- * @typedef { Uint32Array } buffer
- */
 
 /**
  * @param { number } value 
@@ -101,9 +98,9 @@ export function Ch(x, y, z) { return (x & y) ^ (~x & z) }
 export function Maj(x, y, z) { return (x & y) ^ (x & z) ^ (y & z) }
 
 /**
- * @param { buffer } H 
- * @param { buffer } W 
- * @param { buffer } block 
+ * @param { Uint32Array } H 
+ * @param { Uint32Array } W 
+ * @param { Uint32Array } block 
  */
 export function hash(H, W, block) {
     for (let t = 0; t < 16; t++) W[t] = block[t];
@@ -137,10 +134,10 @@ export function hash(H, W, block) {
 }
 
 /**
- * @param { buffer } block 
- * @param { buffer } buffer 
- * @param { buffer } H 
- * @param { buffer } W 
+ * @param { Uint32Array } block 
+ * @param { Uint8Array } buffer 
+ * @param { Uint32Array } H 
+ * @param { Uint32Array } W 
  * @param { number } blockOffset 
  * @param { number } bufferOffset 
  * @param { number } byteLength 
@@ -167,7 +164,7 @@ export class CryptoHasher {
         this[__H].set(init);
     }
     /**
-     * @type { buffer }
+     * @type { Uint32Array }
      */
     [__H] = new Uint32Array(8);
     /**
@@ -183,15 +180,15 @@ export class CryptoHasher {
      */
     [__bufferOffset] = 0;
     /**
-     * @type { buffer }
+     * @type { Uint32Array }
      */
     [__block] = new Uint32Array(16);//new Array(16);
     /**
-     * @type { buffer }
+     * @type { Uint8Array }
      */
-    [__buffer] = new Uint32Array(4);//new Array(4);
+    [__buffer] = new Uint8Array(4);//new Array(4);
     /**
-     * @type { buffer }
+     * @type { Uint32Array }
      */
     [__W] = new Uint32Array(64);//new Array(64);
 
