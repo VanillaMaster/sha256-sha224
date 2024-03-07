@@ -8,7 +8,7 @@
         "url": "https://github.com/VanillaMaster/sha256-sha224.git"
     },
     "name": "@vanilla/sha",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "private": true,
     "description": "pure javascript implementation of sha256 / sha224",
     "type": "module",
